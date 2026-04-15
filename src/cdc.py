@@ -7,7 +7,7 @@ def apply_cdc(spark, df):
     # crear la tabla o remplazar si no existe
     # aquí es donde se guardan los datos finales
     spark.sql("""
-    CREATE OR REPLACE TABLE IF NOT EXISTS local.db.exchange_rates (
+    CREATE TABLE IF NOT EXISTS local.db.exchange_rates (
         date DATE,
         currency STRING,
         rate DOUBLE,
@@ -24,7 +24,7 @@ def apply_cdc(spark, df):
     USING tmp_exchange_rates AS B
     ON A.date = B.date AND A.currency = B.currency
 
-    -- si ya existía pero cambió el valor → actualiza
+    -- si ya existía pero cambió el valor , actualiza
     WHEN MATCHED AND A.rate != B.rate THEN
         UPDATE SET *
 
