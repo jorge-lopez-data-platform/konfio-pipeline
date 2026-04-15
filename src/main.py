@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
+from events import generate_events
 from extract import extract_data
 from transform import transform
 from cdc import apply_cdc
-
 def main():
 
     # iniciamos spark
@@ -26,8 +26,15 @@ def main():
 
     # paso 4: aplicar CDC
     # aquí es donde evitamos duplicados y actualizamos datos
-    apply_cdc(spark, df_new_data)
+    df_events = apply_cdc(spark, df_new_data)   #   guardamos en eventos los nuevos cambios
 
+
+    #paso 5: generamos los eventos 
+    generate_events(df_events)
+
+
+    #paso 6: guardar las metricas mensuales en otra tabla, y remplaza si ya existe
+    df_summary.writeTo("local.db.metricas_mensuales").createOrReplace()
     # solo para confirmar que terminó
     print("se extrajeron los datos d ela api, se aplicaron cambios y se actualizaron")
 
