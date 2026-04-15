@@ -4,6 +4,9 @@ def apply_cdc(spark, df):
 
     df.createOrReplaceTempView("tmp_exchange_rates")
 
+    # crear la bd si no existe
+    spark.sql("CREATE DATABASE IF NOT EXISTS local.db")
+
     # crear la tabla o remplazar si no existe
     # aquí es donde se guardan los datos finales
     spark.sql("""
@@ -24,11 +27,17 @@ def apply_cdc(spark, df):
     USING tmp_exchange_rates AS B
     ON A.date = B.date AND A.currency = B.currency
 
-    -- si ya existía pero cambió el valor , actualiza
+    -- si ya existe y cambió → actualizar columnas
     WHEN MATCHED AND A.rate != B.rate THEN
-        UPDATE SET *
+        UPDATE SET
+            A.date = B.date,
+            A.currency = B.currency,
+            A.rate = B.rate,
+            A.year = B.year,
+            A.month = B.month
 
-    -- si no existe , inserta
+    -- si no existe → insertar
     WHEN NOT MATCHED THEN
-        INSERT *
+        INSERT (date, currency, rate, year, month)
+        VALUES (B.date, B.currency, B.rate, B.year, B.month)
     """)

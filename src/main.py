@@ -6,7 +6,14 @@ from cdc import apply_cdc
 def main():
 
     # iniciamos spark
-    spark = SparkSession.builder.getOrCreate()
+    
+
+    spark = SparkSession.builder \
+    .appName("KonfioPipeline") \
+    .config("spark.sql.catalog.local", "org.apache.iceberg.spark.SparkCatalog") \
+    .config("spark.sql.catalog.local.type", "hadoop") \
+    .config("spark.sql.catalog.local.warehouse", "file:/tmp/warehouse") \
+    .getOrCreate()
 
     # paso 1: traer datos desde la API
     data = extract_data()

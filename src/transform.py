@@ -1,4 +1,4 @@
-from pyspark.sql.functions import col, avg, stddev, min, max, month, year
+from pyspark.sql.functions import col, avg, stddev, min, max, month, year, to_date
 
 def transform(df):
 
@@ -23,6 +23,9 @@ def transform(df):
     # así podremos agrupar por mes
     df = df.withColumn("month", month(col("date")))
 
+
+    # convertir date de string a tipo date
+    df = df.withColumn("date", to_date(col("date")))
 
     # -----------------------------------
     # 3. AGREGACIONES (RESUMEN MENSUAL)
