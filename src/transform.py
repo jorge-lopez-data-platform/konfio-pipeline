@@ -11,6 +11,8 @@ def transform(df):
     df = df.filter(col("rate") > 0)
 
 
+    # convertir date de string a tipo date
+    df = df.withColumn("date", to_date(col("date")))
     # -----------------------------------
     # 2. PREPARAR COLUMNAS PARA AGRUPAR
     # -----------------------------------
@@ -24,8 +26,6 @@ def transform(df):
     df = df.withColumn("month", month(col("date")))
 
 
-    # convertir date de string a tipo date
-    df = df.withColumn("date", to_date(col("date")))
 
     # -----------------------------------
     # 3. AGREGACIONES (RESUMEN MENSUAL)
@@ -83,3 +83,10 @@ def transform(df):
     # df_joined → datos detallados + métricas + anomalías
     # df_summary → resumen mensual por moneda
     return df_joined, df_summary
+
+#se limpian los datos
+#se convierten las fechas a tipo date
+#se agregan columnas de año y mes para facilitar agrupaciones
+#se calcula el promedio, mínimo, máximo y volatilidad por moneda y mes
+#se unen los datos originales con el resumen mensual para tener contexto
+#se omiten valores cuando el valor de rate es >0

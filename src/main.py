@@ -33,3 +33,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    #El main orquesta todo el pipeline.
+    #Primero extraigo datos, luego los transformo y finalmente aplico CDC
+    #para cargar la información en Iceberg sin duplicados.
