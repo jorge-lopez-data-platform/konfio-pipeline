@@ -1,14 +1,15 @@
 from pyspark.sql import SparkSession
 from extract import extract_data
+from transform import transform
 
 def main():
-    spark = SparkSession.builder.appName("KonfioPipeline").getOrCreate()
+    spark = SparkSession.builder.getOrCreate()
 
-    # Extraer datos
-    rows = extract_data()
+    data = extract_data()
 
-    # Crear DataFrame
-    df = spark.createDataFrame(rows, ["date", "currency", "rate"])
+    df = spark.createDataFrame(data, ["date", "currency", "rate"])
+
+    df = transform(df)
 
     df.show()
 
