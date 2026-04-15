@@ -3,6 +3,7 @@ from extract import extract_data
 from transform import transform
 
 def main():
+
     spark = SparkSession.builder.getOrCreate()
 
     data = extract_data()

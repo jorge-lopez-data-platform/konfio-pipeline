@@ -1,29 +1,20 @@
-from pyspark.sql.functions import col, lag, avg, stddev
-from pyspark.sql.window import Window
+from pyspark.sql.functions import col, avg, min, max, stddev, month, year
 
 def transform(df):
 
-    # 1. Limpiar datos
+    # limpiar datos
     df = df.filter(col("rate") > 0)
 
-    # 2. Crear una "ventana" por moneda ordenada por fecha
-    window = Window.partitionBy("currency").orderBy("date")
+    # agregar columnas de año y mes (para agrupar)
+    df = df.withColumn("year", year(col("date")))
+    df = df.withColumn("month", month(col("date")))
 
-    # 3. Cambio diario
-    df = df.withColumn(
-        "daily_change",
-        (col("rate") - lag("rate").over(window)) / lag("rate").over(window)
+    # 🔥 aquí usamos groupBy (más fácil de entender)
+    df_grouped = df.groupBy("currency", "year", "month").agg(
+        avg("rate").alias("avg_rate"),
+        min("rate").alias("min_rate"),
+        max("rate").alias("max_rate"),
+        stddev("rate").alias("volatility")
     )
 
-    # 4. Promedio últimos 7 días
-    window7 = window.rowsBetween(-6, 0)
-    df = df.withColumn("ma7", avg("rate").over(window7))
-
-    # 5. Promedio últimos 30 días
-    window30 = window.rowsBetween(-29, 0)
-    df = df.withColumn("ma30", avg("rate").over(window30))
-
-    # 6. Volatilidad
-    df = df.withColumn("volatility", stddev("rate").over(window30))
-
-    return df
+    return df_grouped
